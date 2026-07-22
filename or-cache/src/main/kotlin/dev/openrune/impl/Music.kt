@@ -49,6 +49,19 @@ object Music {
                 )
                 column(2, true)
             }
+
+            // Falador surroundings (area.falador_surroundings), which contains the Crafting Guild:
+            // Miles Away, Nightfall and Long Way Home cycle here.
+            row("dbrow.music_modern_south_falador") {
+                column(0, "falador_surroundings")
+                columnRSCM(
+                    1,
+                    "dbrow.music_miles_away",
+                    "dbrow.music_nightfall",
+                    "dbrow.music_long_way_home",
+                )
+                column(2, true)
+            }
         }
 
     fun musicClassic() =

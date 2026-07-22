@@ -37,6 +37,7 @@ import org.rsmod.api.repo.loc.LocRepository
 import org.rsmod.api.repo.npc.NpcRepository
 import org.rsmod.api.utils.format.formatAmount
 import org.rsmod.api.utils.system.SafeServiceExit
+import org.rsmod.content.skills.crafting.CraftingRecipes
 import org.rsmod.game.GameUpdate
 import org.rsmod.game.cheat.Cheat
 import org.rsmod.game.entity.Npc
@@ -115,6 +116,10 @@ constructor(
 
         onCommand("invadd", "Spawn obj into inv", ::invAdd)
         onCommand("item", "Spawn obj into inv", ::invAdd)
+
+        onCommand("craftmat", "Spawn materials for a crafting recipe", ::craftMaterials) {
+            invalidArgs = "Use as ::craftmat objDebugName [amount] (ex: ::craftmat red_dragonhide_body 6)"
+        }
 
         onCommand("invclear", "Remove all objs from inv", ::invClear)
         onCommand("varp", "Set varp value", ::setVarp) {
@@ -386,6 +391,37 @@ constructor(
             }
             player.mes("Spawned inv obj `$objName` x ${spawned.completed().formatAmount}")
         }
+
+    private fun craftMaterials(cheat: Cheat) =
+        with(cheat) {
+            val typeName = args[0]
+            val crafts = args.getOrNull(1)?.toInt()?.coerceAtLeast(1) ?: 1
+
+            val output = "obj.$typeName"
+            val materials = CraftingRecipes.materialsFor(output, crafts)
+            if (materials == null) {
+                player.mes("No crafting recipe produces: $output")
+                return
+            }
+
+            for (material in materials) {
+                // Only hand a tool over if they don't already have it.
+                if (material.tool && player.inv.contains(material.obj)) {
+                    continue
+                }
+                player.spawnMaterial(material.obj, material.count)
+            }
+            player.mes("Spawned materials for `$typeName` x $crafts")
+        }
+
+    /** Spawns [count] of [internal], uses noted items when it can't fit. */
+    private fun Player.spawnMaterial(internal: String, count: Int) {
+        val type = ServerCacheManager.getItem(internal.asRSCM(RSCMType.OBJ)) ?: return
+        val slots = if (type.isStackable) 1 else count
+        val noted = type.certlink.takeIf { slots > inv.freeSpace() && type.canCert }
+        val spawn = noted?.let { ServerCacheManager.getItem(it)?.internalName } ?: internal
+        invAdd(inv, spawn, count, strict = false)
+    }
 
     private fun invClear(cheat: Cheat) = with(cheat) { player.invClear(player.inv) }
 

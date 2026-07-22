@@ -28,6 +28,7 @@ import dev.openrune.tables.PickableObjects
 import dev.openrune.tables.SettingConfigs
 import dev.openrune.tables.StatComponents
 import dev.openrune.tables.skills.Cooking
+import dev.openrune.tables.skills.Crafting
 import dev.openrune.tables.skills.Firemaking
 import dev.openrune.tables.skills.Herblore
 import dev.openrune.tables.skills.Slayer
@@ -82,6 +83,10 @@ fun tablesToPack() = listOf(
     Herblore.barbarianMixes(),
     Herblore.swampTar(),
     Herblore.crushing(),
+    Crafting.facilities(),
+    Crafting.hand(),
+    Crafting.silver(),
+    Crafting.gold(),
     Smithing.bars(),
     Smithing.cannonBalls(),
     Smithing.dragonForge(),

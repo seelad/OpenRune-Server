@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.api.mechanics.toxins)
     implementation(projects.api.pluginCommons)
     implementation(projects.api.spellsAutocast)
+    implementation(projects.content.skills.crafting)
 
     implementation(projects.api.utils.utilsSystem)
     implementation(projects.engine.utilsBits)

@@ -11,6 +11,10 @@ import org.rsmod.content.skills.Material
 import org.rsmod.content.skills.SkillMultiConfig
 import org.rsmod.content.skills.SkillMultiEntry
 import org.rsmod.content.skills.SkillingActionType
+import org.rsmod.content.skills.crafting.interfaces.hasGoldCraftingBars
+import org.rsmod.content.skills.crafting.interfaces.hasSilverCraftingBars
+import org.rsmod.content.skills.crafting.interfaces.openGoldCrafting
+import org.rsmod.content.skills.crafting.interfaces.openSilverCrafting
 import org.rsmod.content.skills.openSkillMulti
 import org.rsmod.content.skills.smithing.hasCannonballFurnaceMould
 import org.rsmod.content.skills.smithing.openCannonballFurnaceMenu
@@ -35,13 +39,30 @@ class SmeltingScript @Inject constructor(private val xpMods: XpModifiers, ) : Pl
     private val barsByOutput = allBars.associateBy { it.output.internalName }
 
     override fun ScriptContext.startup() {
+        // The furnace's smelt op, in priority order:
+        //  1. ore that can actually be smelted -> the usual smelting menu;
+        //  2. otherwise cannonballs, if the mould *and* the bars for them are held
+        //     (openCannonballFurnaceMenu returns false when there are no bars, so a lone mould
+        //     doesn't swallow the click);
+        //  3. otherwise gold or silver bars -> that bar's crafting interface, which is the Crafting
+        //     module's. Either opens on bars alone: with no mould it still opens and tells the
+        //     player which moulds it is missing.
         onOpLocCategory2("category.furnace") {
             val locInternal = it.type.internalName
             val coords = it.loc.coords
             if (hasBarSmeltMaterials()) {
                 openStandardSmeltMenu(locInternal, coords)
-            } else if (hasCannonballFurnaceMould()) {
-                openCannonballFurnaceMenu(locInternal)
+                return@onOpLocCategory2
+            }
+            val smeltingCannonballs =
+                hasCannonballFurnaceMould() && openCannonballFurnaceMenu(locInternal)
+            if (smeltingCannonballs) {
+                return@onOpLocCategory2
+            }
+            if (hasGoldCraftingBars()) {
+                openGoldCrafting()
+            } else if (hasSilverCraftingBars()) {
+                openSilverCrafting()
             }
         }
 
