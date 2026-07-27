@@ -49,6 +49,17 @@ object Music {
                 )
                 column(2, true)
             }
+
+            row("dbrow.music_modern_south_falador") {
+                column(0, "falador_surroundings")
+                columnRSCM(
+                    1,
+                    "dbrow.music_miles_away",
+                    "dbrow.music_nightfall",
+                    "dbrow.music_long_way_home",
+                )
+                column(2, true)
+            }
         }
 
     fun musicClassic() =
